@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import React from "react";
-import ReactDOM from "react-dom";
 
 function WebCamRecorder() {
   const [isRecording, setIsRecording] = useState(false);
