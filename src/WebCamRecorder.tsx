@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import React from "react";
+import ReactDOM from "react-dom";
 
 function WebCamRecorder() {
   const [isRecording, setIsRecording] = useState(false);
@@ -34,19 +36,22 @@ function WebCamRecorder() {
     setIsRecording(true);
   }
 
-  useEffect(function() {
-    if (isRecording) {
-      return;
-    }
-    if (chunks.current.length === 0) {
-      return;
-    }
-    const blob = new Blob(chunks.current, {
-      type: "video/x-matroska;codecs=avc1,opus",
-    });
-    setDownloadLink(URL.createObjectURL(blob));
-    chunks.current = [];
-  }, [isRecording])
+  useEffect(
+    function () {
+      if (isRecording) {
+        return;
+      }
+      if (chunks.current.length === 0) {
+        return;
+      }
+      const blob = new Blob(chunks.current, {
+        type: "video/x-matroska;codecs=avc1,opus"
+      });
+      setDownloadLink(URL.createObjectURL(blob));
+      chunks.current = [];
+    },
+    [isRecording]
+  );
 
   function stopRecording() {
     if (!streamRecorderRef.current) {
@@ -54,6 +59,33 @@ function WebCamRecorder() {
     }
     streamRecorderRef.current.stop();
     setIsRecording(false);
+  }
+
+  function uploadVideo(mediaBlob: string | URL) {
+    {
+      //load blob
+      var xhr_get_audio = new XMLHttpRequest();
+      xhr_get_audio.open("GET", mediaBlob, true);
+      xhr_get_audio.responseType = "blob";
+      xhr_get_audio.onload = function (e) {
+        if (this.status == 200) {
+          var vblob = this.response;
+          //send the blob to the server
+          var xhr_send = new XMLHttpRequest();
+          var filename = new Date().toISOString();
+          xhr_get_audio.onload = function (e) {
+            if (this.readyState === 4) {
+              console.log("Server returned: ", e.target.responseText);
+            }
+          };
+          var fd = new FormData();
+          fd.append("audio_data", vblob, filename);
+          xhr_send.open("POST", "http://localhost/uploadAudio", true);
+          xhr_send.send(fd);
+        }
+      };
+      xhr_get_audio.send();
+    }
   }
 
   useEffect(function () {
@@ -73,11 +105,11 @@ function WebCamRecorder() {
         }
         const constraints = {
           audio: {
-            deviceId: audioSource !== "" ? { exact: audioSource } : undefined,
+            deviceId: audioSource !== "" ? { exact: audioSource } : undefined
           },
           video: {
-            deviceId: videoSource !== "" ? { exact: videoSource } : undefined,
-          },
+            deviceId: videoSource !== "" ? { exact: videoSource } : undefined
+          }
         };
         try {
           const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -98,12 +130,12 @@ function WebCamRecorder() {
           if (deviceInfo.kind === "audioinput") {
             audioSourceOptions.push({
               value: deviceInfo.deviceId,
-              label: deviceInfo.label || `Microphone ${deviceInfo.deviceId}`,
+              label: deviceInfo.label || `Microphone ${deviceInfo.deviceId}`
             });
           } else if (deviceInfo.kind === "videoinput") {
             videoSourceOptions.push({
               value: deviceInfo.deviceId,
-              label: deviceInfo.label || `Camera ${deviceInfo.deviceId}`,
+              label: deviceInfo.label || `Camera ${deviceInfo.deviceId}`
             });
           }
         }
@@ -144,17 +176,19 @@ function WebCamRecorder() {
         {downloadLink && <video src={downloadLink} controls></video>}
         {downloadLink && (
           <a href={downloadLink} download="file.mp4">
-            Descargar
+            Download Video
           </a>
         )}
       </div>
+
       <div>
-        <button onClick={startRecording} disabled={isRecording}>
-          Grabar
+        <button onClick={startRecording} uploadVideo={isRecording}>
+          Start Recording
         </button>
-        <button onClick={stopRecording} disabled={!isRecording}>
-          Parar
+        <button onClick={stopRecording} enabled={!isRecording}>
+          Stop Recording
         </button>
+        <button onClick={uploadVideo()}> Submit Video</button>
       </div>
       <div>{error && <p>{error.message}</p>}</div>
     </div>

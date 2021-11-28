@@ -1,5 +1,7 @@
-import './App.css';
-import WebCamRecorder from './WebCamRecorder'
+import "./App.css";
+import WebCamRecorder from "./WebCamRecorder";
+import { useState } from "react";
+import ReactDOM from "react-dom";
 
 function App() {
   return (
