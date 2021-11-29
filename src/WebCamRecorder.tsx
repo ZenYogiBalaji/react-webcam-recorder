@@ -18,7 +18,7 @@ function WebCamRecorder() {
   const [error, setError] = useState<null | Error>(null);
   const chunks = useRef<any[]>([]);
 
-  const vblob = new Blob(chunks.current, {
+  var vblob = new Blob(chunks.current, {
     type: "video/x-matroska;codecs=avc1,opus"
   });
 
@@ -68,32 +68,30 @@ function WebCamRecorder() {
   const mediaBlobURL = URL.createObjectURL(vblob);
 
   function uploadVideo() {
-    {
-      //load blob
-      mediablob = mediaBlobURL;
+    //load blob
+    mediablob = URL.createObjectURL(vblob);
 
-      var xhr_get_audio = new XMLHttpRequest();
-      xhr_get_audio.open("GET", mediablob, true);
-      xhr_get_audio.responseType = "blob";
-      xhr_get_audio.onload = function (e) {
-        if (this.status == 200) {
-          var vblob = this.response;
-          //send the blob to the server
-          var xhr_send = new XMLHttpRequest();
-          var filename = new Date().toISOString();
-          xhr_get_audio.onload = function (e) {
-            if (this.readyState === 4) {
-              console.log("Server returned: ", e.target.responseText);
-            }
-          };
-          var fd = new FormData();
-          fd.append("audio_data", vblob, filename);
-          xhr_send.open("POST", "http://localhost/uploadAudio", true);
-          xhr_send.send(fd);
-        }
-      };
-      xhr_get_audio.send();
-    }
+    var xhr_get_audio = new XMLHttpRequest();
+    xhr_get_audio.open("GET", mediablob, true);
+    xhr_get_audio.responseType = "blob";
+    xhr_get_audio.onload = function (e) {
+      if (this.status == 200) {
+        var vblob = this.response;
+        //send the blob to the server
+        var xhr_send = new XMLHttpRequest();
+        var filename = new Date().toISOString();
+        xhr_get_audio.onload = function (e) {
+          if (this.readyState === 4) {
+            console.log("Server returned: ", e.target.responseText);
+          }
+        };
+        var fd = new FormData();
+        fd.append("audio_data", vblob, filename);
+        xhr_send.open("POST", "http://localhost/uploadAudio", true);
+        xhr_send.send(fd);
+      }
+    };
+    xhr_get_audio.send();
   }
 
   useEffect(function () {
