@@ -69,10 +69,9 @@ function WebCamRecorder() {
 
   function uploadVideo() {
     //load blob
-    mediablob = URL.createObjectURL(vblob);
 
     var xhr_get_audio = new XMLHttpRequest();
-    xhr_get_audio.open("GET", mediablob, true);
+    xhr_get_audio.open("GET", mediaBlobURL, true);
     xhr_get_audio.responseType = "blob";
     xhr_get_audio.onload = function (e) {
       if (this.status == 200) {
