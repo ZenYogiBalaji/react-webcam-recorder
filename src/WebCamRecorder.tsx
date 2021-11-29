@@ -18,6 +18,10 @@ function WebCamRecorder() {
   const [error, setError] = useState<null | Error>(null);
   const chunks = useRef<any[]>([]);
 
+  const vblob = new Blob(chunks.current, {
+    type: "video/x-matroska;codecs=avc1,opus"
+  });
+
   function startRecording() {
     if (isRecording) {
       return;
@@ -46,6 +50,7 @@ function WebCamRecorder() {
       const blob = new Blob(chunks.current, {
         type: "video/x-matroska;codecs=avc1,opus"
       });
+      vblob = blob;
       setDownloadLink(URL.createObjectURL(blob));
       chunks.current = [];
     },
@@ -60,11 +65,15 @@ function WebCamRecorder() {
     setIsRecording(false);
   }
 
-  function uploadVideo(mediaBlob: string | URL) {
+  const mediaBlobURL = URL.createObjectURL(vblob);
+
+  function uploadVideo() {
     {
       //load blob
+      mediablob = mediaBlobURL;
+
       var xhr_get_audio = new XMLHttpRequest();
-      xhr_get_audio.open("GET", mediaBlob, true);
+      xhr_get_audio.open("GET", mediablob, true);
       xhr_get_audio.responseType = "blob";
       xhr_get_audio.onload = function (e) {
         if (this.status == 200) {
